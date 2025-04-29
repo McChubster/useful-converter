@@ -1,17 +1,5 @@
-interface Unit {
-    name: string;
-    symbol: string;
-}
-
-
-interface Category {
-    name: string;
-    units: Record<string, Unit>;
-}
-
-type Categories = Record<string, Category>
-
-const category: Categories = {
+"use strict";
+const category = {
     "length": {
         name: "Length",
         units: {
@@ -83,55 +71,51 @@ const category: Categories = {
             "kelvin": { name: "Kelvin", symbol: "K" }
         }
     }
-}
-
-console.log(category["length"]["units"]["centimeter"]["symbol"]) // shows "cm"
-
-const categoryScenarioContainer = document.getElementById("category-scenarios-container")
-
+};
+console.log(category["length"]["units"]["centimeter"]["symbol"]); // shows "cm"
+const categoryScenarioContainer = document.getElementById("category-scenarios-container");
 if (categoryScenarioContainer) {
-    categoryScenarioContainer.addEventListener('click', function(event) {
-        const buttonPressed = event.target as HTMLElement
-        const fromDropdown = document.getElementById("from-dropdown") as HTMLSelectElement
-        const toDropdown = document.getElementById("to-dropdown") as HTMLSelectElement
-
+    categoryScenarioContainer.addEventListener('click', function (event) {
+        const buttonPressed = event.target;
+        const fromDropdown = document.getElementById("from-dropdown");
+        const toDropdown = document.getElementById("to-dropdown");
         // Check if element clicked is a button
         if (buttonPressed.tagName === "BUTTON") {
-            const button = buttonPressed.dataset.category // get button data-category
+            const button = buttonPressed.dataset.category; // get button data-category
             // Check if button actually has a category and category exists in category object
             if (button && category.hasOwnProperty(button)) {
                 // Remove all options in dropdown menus
-                fromDropdown.options.length = 0
-                toDropdown.options.length = 0
-                
+                fromDropdown.options.length = 0;
+                toDropdown.options.length = 0;
                 // Retrieve all units within clicked button/category
-                const unitsInCategory = category[button].units
-
+                const unitsInCategory = category[button].units;
                 // Loop through all the units in selected button/category, then populate both dropdown menu
                 for (const unitNames in unitsInCategory) {
-                    const unit = unitsInCategory[unitNames]
+                    const unit = unitsInCategory[unitNames];
                     // Create new options
-                    const newOption = document.createElement('option')
-                    
+                    const newOption = document.createElement('option');
                     //Set value for new option (HTML)
-                    newOption.value = unit.name
-
+                    newOption.value = unit.name;
                     // Set displaying text for new option
-                    newOption.text = `${unit.name}(${unit.symbol})`
-
+                    newOption.text = `${unit.name}(${unit.symbol})`;
                     // Add new options 
-                    fromDropdown.add(newOption)
-                    toDropdown.add(newOption)
+                    fromDropdown.add(newOption);
+                    toDropdown.add(newOption);
                 }
-
                 // console.log(category[button.toLowerCase()])
             }
-            
         }
-
         // console.log(`buttonPressed itself: ${buttonPressed}`)
         // console.log(`textContent: ${buttonPressed.textContent}`)
         // console.log(`tagName: ${buttonPressed.tagName}`)
         // console.log(`dataset: ${buttonPressed.dataset.category}`)
     });
+}
+function checkButtonPressed(button) {
+    if (button.tagName === 'button') {
+        return true;
+    }
+    else {
+        return false;
+    }
 }

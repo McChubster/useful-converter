@@ -20,4 +20,3 @@ npm-debug.log*
 yarn-debug.log*
 yarn-error.log*
 *.lognode_modules/
-dist/

@@ -13,6 +13,8 @@
                 <button class="category-btn" id="currency-btn" data-category="currency">Currency</button>
                 <button class="category-btn" id="time-btn" data-category="time">Time</button>
                 <button class="category-btn" id="temp-btn" data-category="temperature">Temperature</button>
+                <button class="category-btn" id="test-btn" data-category="test">Test</button>
+
             </div>
             <label for="scenarios-container">Scenarios</label>
             <div id="scenarios-container">
@@ -29,21 +31,21 @@
         class="unit-input"
         id="from-input"
         />
-        <select name="units">
-
+        <select name="units" class="units-dropdown" id="from-dropdown">
+            <option>test</option>
         </select>
 
-        <label for="convertTo-input">From</label>
+        <label for="convertTo-input">To</label>
         <input
         type="text"
         class="unit-input"
         id="to-input"
         />
-        <select name="units">
-
+        <select name="units" class="units-dropdown" id="to-dropdown">
+            <option>test</option>
         </select>
 
         <button>Convert</button>
     </body>
-    <script src="dist/converter.js"></script>
+    <script src="dist/converter.js?v=1"></script>
 </html>
