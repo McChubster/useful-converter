@@ -111,11 +111,3 @@ if (categoryScenarioContainer) {
         // console.log(`dataset: ${buttonPressed.dataset.category}`)
     });
 }
-function checkButtonPressed(button) {
-    if (button.tagName === 'button') {
-        return true;
-    }
-    else {
-        return false;
-    }
-}
