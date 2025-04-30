@@ -95,43 +95,93 @@ if (categoryScenarioContainer) {
         const fromDropdown = document.getElementById("from-dropdown") as HTMLSelectElement
         const toDropdown = document.getElementById("to-dropdown") as HTMLSelectElement
 
-        // Check if element clicked is a button
-        if (buttonPressed.tagName === "BUTTON") {
-            const button = buttonPressed.dataset.category // get button data-category
-            // Check if button actually has a category and category exists in category object
-            if (button && category.hasOwnProperty(button)) {
-                // Remove all options in dropdown menus
-                fromDropdown.options.length = 0
-                toDropdown.options.length = 0
+        let buttonClicked = checkButtonClicked(buttonPressed) as string
+
+        populateDropdowns(fromDropdown, toDropdown, buttonClicked)
+        
+
+
+        // // Check if element clicked is a button
+        // if (buttonPressed.tagName === "BUTTON") {
+        //     const button = buttonPressed.dataset.category // get button data-category
+        //     // Check if button actually has a category and category exists in category object
+        //     if (button && category.hasOwnProperty(button)) {
+        //         // Remove all options in dropdown menus
+        //         fromDropdown.options.length = 0
+        //         toDropdown.options.length = 0
                 
-                // Retrieve all units within clicked button/category
-                const unitsInCategory = category[button].units
+        //         // Retrieve all units within clicked button/category
+        //         const unitsInCategory = category[button].units
 
-                // Loop through all the units in selected button/category, then populate both dropdown menu
-                for (const unitNames in unitsInCategory) {
-                    const unit = unitsInCategory[unitNames]
-                    // Create new options
-                    const newOption = document.createElement('option')
+        //         // Loop through all the units in selected button/category, then populate both dropdown menu
+        //         for (const unitNames in unitsInCategory) {
+        //             const unit = unitsInCategory[unitNames]
+        //             // Create new options
+        //             const newOption = document.createElement('option')
                     
-                    //Set value for new option (HTML)
-                    newOption.value = unit.name
+        //             //Set value for new option (HTML)
+        //             newOption.value = unit.name
 
-                    // Set displaying text for new option
-                    newOption.text = `${unit.name}(${unit.symbol})`
+        //             // Set displaying text for new option
+        //             newOption.text = `${unit.name}(${unit.symbol})`
 
-                    // Add new options 
-                    fromDropdown.add(newOption)
-                    toDropdown.add(newOption)
-                }
+        //             // Add new options 
+        //             fromDropdown.add(newOption)
+        //             toDropdown.add(newOption)
+        //         }
 
-                // console.log(category[button.toLowerCase()])
-            }
+        //         // console.log(category[button.toLowerCase()])
+        //     }
             
-        }
+        // }
 
         // console.log(`buttonPressed itself: ${buttonPressed}`)
         // console.log(`textContent: ${buttonPressed.textContent}`)
         // console.log(`tagName: ${buttonPressed.tagName}`)
         // console.log(`dataset: ${buttonPressed.dataset.category}`)
     });
+}
+
+
+function checkButtonClicked(buttonPressed: HTMLElement) : string | null {
+    // Check if element clicked is a button
+    if (buttonPressed.tagName === 'BUTTON') {
+        // Get button's data-category
+        const button = buttonPressed.dataset.category
+        // Check if button has a data-category and if category exist
+        if (button && category.hasOwnProperty(button)) {
+            // Return name of button to populate dropdown
+            return button
+        }
+    } 
+    return null
+}
+
+function populateDropdowns(fromDropdown: HTMLSelectElement, toDropdown: HTMLSelectElement, button: string) {
+    // Clear dropdown menus
+    fromDropdown.options.length = 0
+    toDropdown.options.length = 0
+
+    // Retrieve all units in selected category
+    const unitsInCategory = category[button].units
+
+    // Populate dropdowns
+    for (const unitNames in unitsInCategory) {
+        const unit = unitsInCategory[unitNames]
+        // Create new options
+        const newOption = document.createElement('option') as HTMLOptionElement
+        
+        //Set value for new option (HTML)
+        newOption.value = unit.name
+
+        // Set displaying text for new option
+        newOption.text = `${unit.name}(${unit.symbol})`
+
+        // Add new options to fromDropdown
+        fromDropdown.add(newOption)
+
+        // Clone the new option and add to toDropdown (an element can only have one parent)
+        const clonedNewOption = newOption.cloneNode(true) as HTMLOptionElement
+        toDropdown.add(clonedNewOption)
+    }
 }
