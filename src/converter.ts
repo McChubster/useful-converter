@@ -9,9 +9,9 @@ interface Category {
     units: Record<string, Unit>;
 }
 
-type Categories = Record<string, Category>
 
-const category: Categories = {
+// Map for all categories and units
+const category: Record<string, Category> = {
     "length": {
         name: "Length",
         units: {
@@ -31,6 +31,7 @@ const category: Categories = {
             "milliliter": { name: "Milliliter", symbol: "mL" },
             "liter": { name: "Liter", symbol: "L" },
             "gram": { name: "Gram", symbol: "g" },
+            "kilogram":{ name: 'Kilogram', symbol: "kg" },
             "tablespoon": { name: "Tablespoon", symbol: "tbsp" },
             "teaspoon": { name: "Teaspoon", symbol: "tsp" },
             "cup": { name: "Cup", symbol: "c" },
@@ -85,71 +86,74 @@ const category: Categories = {
     }
 }
 
-console.log(category["length"]["units"]["centimeter"]["symbol"]) // shows "cm"
-
-const categoryScenarioContainer = document.getElementById("category-scenarios-container")
-
-if (categoryScenarioContainer) {
-    categoryScenarioContainer.addEventListener('click', function(event) {
-        const buttonPressed = event.target as HTMLElement
-        const fromDropdown = document.getElementById("from-dropdown") as HTMLSelectElement
-        const toDropdown = document.getElementById("to-dropdown") as HTMLSelectElement
-
-        let buttonClicked = checkButtonClicked(buttonPressed) as string
-
-        populateDropdowns(fromDropdown, toDropdown, buttonClicked)
-        
-
-
-        // // Check if element clicked is a button
-        // if (buttonPressed.tagName === "BUTTON") {
-        //     const button = buttonPressed.dataset.category // get button data-category
-        //     // Check if button actually has a category and category exists in category object
-        //     if (button && category.hasOwnProperty(button)) {
-        //         // Remove all options in dropdown menus
-        //         fromDropdown.options.length = 0
-        //         toDropdown.options.length = 0
-                
-        //         // Retrieve all units within clicked button/category
-        //         const unitsInCategory = category[button].units
-
-        //         // Loop through all the units in selected button/category, then populate both dropdown menu
-        //         for (const unitNames in unitsInCategory) {
-        //             const unit = unitsInCategory[unitNames]
-        //             // Create new options
-        //             const newOption = document.createElement('option')
-                    
-        //             //Set value for new option (HTML)
-        //             newOption.value = unit.name
-
-        //             // Set displaying text for new option
-        //             newOption.text = `${unit.name}(${unit.symbol})`
-
-        //             // Add new options 
-        //             fromDropdown.add(newOption)
-        //             toDropdown.add(newOption)
-        //         }
-
-        //         // console.log(category[button.toLowerCase()])
-        //     }
-            
-        // }
-
-        // console.log(`buttonPressed itself: ${buttonPressed}`)
-        // console.log(`textContent: ${buttonPressed.textContent}`)
-        // console.log(`tagName: ${buttonPressed.tagName}`)
-        // console.log(`dataset: ${buttonPressed.dataset.category}`)
-    });
+interface ConversionRatios {
+    toAnchor: Record<string, number> 
 }
 
 
-function checkButtonClicked(buttonPressed: HTMLElement) : string | null {
+// Map for all conversion ratios
+const conversionRatios: Record<string, ConversionRatios> = {
+    // First unit within each categories are the anchor units
+    // All other units convert to and from this anchor
+    "length": {
+        toAnchor : {
+            "meter": 1, // Base unit
+            "inch": 0.0254,
+            "centimeter": 0.01,
+            "kilometer": 1000,
+            "foot": 0.3048,
+            "yard": 0.9144,
+            "millimeter": 0.001,
+            "mile": 1609.344
+        }   
+    },
+    "volummeMass": {
+        toAnchor: {
+            "kilogram": 1, // Base unit
+            "gram": 0.001,
+            "milligram": 0.000001,
+            "pound": 0.45359237,
+            "ounce": 0.0283495231,
+            "liter": 1,             // assuming 1 liter = 1 kg (water density), adjust if needed
+            "milliliter": 0.001,
+            "cup": 0.24,            // assuming metric cup
+            "tablespoon": 0.015,    // metric tbsp
+            "teaspoon": 0.005,      // metric tsp
+            "quart": 0.946353,      // US quart to kg
+            "fluid_ounce": 0.0295735,
+            "gallon": 3.78541       // US gallon
+        }
+    },
+    "area": {
+        toAnchor: {
+            "square_meter": 1, //Anchor unit
+            "square_centimeter": 0.0001,
+            "square_kilometer": 1_000_000,
+            "square_foot": 0.092903,
+            "ping": 3.30579
+        }
+    }
+}
+
+const categoryScenarioContainer = document.getElementById("category-scenarios-container")
+const convertButton = document.getElementById("convert-btn")
+const leftInput = document.getElementById("from-input") 
+const rightInput = document.getElementById("to-input")
+
+
+function checkButtonClicked(fromDropdown: HTMLSelectElement, toDropdown: HTMLSelectElement,buttonPressed: HTMLElement) : string | null {
     // Check if element clicked is a button
     if (buttonPressed.tagName === 'BUTTON') {
         // Get button's data-category
         const button = buttonPressed.dataset.category
+
         // Check if button has a data-category and if category exist
         if (button && category.hasOwnProperty(button)) {
+
+            // Clear dropdown menu options
+            fromDropdown.options.length = 0
+            toDropdown.options.length = 0
+
             // Return name of button to populate dropdown
             return button
         }
@@ -157,11 +161,8 @@ function checkButtonClicked(buttonPressed: HTMLElement) : string | null {
     return null
 }
 
-function populateDropdowns(fromDropdown: HTMLSelectElement, toDropdown: HTMLSelectElement, button: string) {
-    // Clear dropdown menus
-    fromDropdown.options.length = 0
-    toDropdown.options.length = 0
 
+function populateDropdowns(fromDropdown: HTMLSelectElement, toDropdown: HTMLSelectElement, button: string) {
     // Retrieve all units in selected category
     const unitsInCategory = category[button].units
 
@@ -185,3 +186,43 @@ function populateDropdowns(fromDropdown: HTMLSelectElement, toDropdown: HTMLSele
         toDropdown.add(clonedNewOption)
     }
 }
+
+
+function conversion(value1: number, value2?: number, ) {
+
+}
+
+
+if (categoryScenarioContainer) {
+    categoryScenarioContainer.addEventListener('click', function(event) {
+        const buttonPressed = event.target as HTMLElement
+        const fromDropdown = document.getElementById("from-dropdown") as HTMLSelectElement
+        const toDropdown = document.getElementById("to-dropdown") as HTMLSelectElement
+        let buttonClicked = checkButtonClicked(fromDropdown, toDropdown, buttonPressed) as string
+        populateDropdowns(fromDropdown, toDropdown, buttonClicked)
+    })
+}
+
+if (convertButton) {
+    convertButton.addEventListener('click', function() {
+    // const isInputFilled = 
+
+    const leftInput = document.getElementById("from-input") as HTMLInputElement
+    const rightInput = document.getElementById("to-input") as HTMLInputElement
+    
+
+    // For testing purposes
+    let leftValue = document.getElementById("left-value")
+    let rightValue = document.getElementById("right-value")
+    if (leftValue) {
+        leftValue.innerText = `Left Input: ${leftInput.value}`
+    }
+    if (rightValue) {
+        rightValue.innerText = `Right Input: ${rightInput.value}`
+    }
+
+    })
+
+}
+
+

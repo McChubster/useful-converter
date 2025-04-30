@@ -1,5 +1,8 @@
+<!DOCTYPE html>
 <html lang="en">
     <head>
+        <!-- for use of "²" and "°" -->
+        <meta charset="UTF-8"> 
         <link rel="stylesheet" href="converter.css">
     </head>
     <body>
@@ -23,27 +26,27 @@
             </div>
         </div>
 
-        <label for="convertFrom-input">From</label>
+        <label for="from-input">From</label>
         <input
-        type="text"
+        type="number"
         class="unit-input"
         id="from-input"
         />
         <select name="units" class="units-dropdown" id="from-dropdown">
-            <option>test</option>
         </select>
 
-        <label for="convertTo-input">To</label>
+        <label for="to-input">To</label>
         <input
-        type="text"
+        type="number"
         class="unit-input"
         id="to-input"
         />
         <select name="units" class="units-dropdown" id="to-dropdown">
-            <option>test</option>
         </select>
 
-        <button>Convert</button>
+        <button id="convert-btn">Convert</button>
+        <p id="left-value">Left Input: </p>
+        <p id="right-value">Right Input: </p>
     </body>
     <script src="dist/converter.js?v=1"></script>
 </html>

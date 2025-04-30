@@ -72,54 +72,20 @@ const category = {
         }
     }
 };
-console.log(category["length"]["units"]["centimeter"]["symbol"]); // shows "cm"
 const categoryScenarioContainer = document.getElementById("category-scenarios-container");
-if (categoryScenarioContainer) {
-    categoryScenarioContainer.addEventListener('click', function (event) {
-        const buttonPressed = event.target;
-        const fromDropdown = document.getElementById("from-dropdown");
-        const toDropdown = document.getElementById("to-dropdown");
-        let buttonClicked = checkButtonClicked(buttonPressed);
-        populateDropdowns(fromDropdown, toDropdown, buttonClicked);
-        // // Check if element clicked is a button
-        // if (buttonPressed.tagName === "BUTTON") {
-        //     const button = buttonPressed.dataset.category // get button data-category
-        //     // Check if button actually has a category and category exists in category object
-        //     if (button && category.hasOwnProperty(button)) {
-        //         // Remove all options in dropdown menus
-        //         fromDropdown.options.length = 0
-        //         toDropdown.options.length = 0
-        //         // Retrieve all units within clicked button/category
-        //         const unitsInCategory = category[button].units
-        //         // Loop through all the units in selected button/category, then populate both dropdown menu
-        //         for (const unitNames in unitsInCategory) {
-        //             const unit = unitsInCategory[unitNames]
-        //             // Create new options
-        //             const newOption = document.createElement('option')
-        //             //Set value for new option (HTML)
-        //             newOption.value = unit.name
-        //             // Set displaying text for new option
-        //             newOption.text = `${unit.name}(${unit.symbol})`
-        //             // Add new options 
-        //             fromDropdown.add(newOption)
-        //             toDropdown.add(newOption)
-        //         }
-        //         // console.log(category[button.toLowerCase()])
-        //     }
-        // }
-        // console.log(`buttonPressed itself: ${buttonPressed}`)
-        // console.log(`textContent: ${buttonPressed.textContent}`)
-        // console.log(`tagName: ${buttonPressed.tagName}`)
-        // console.log(`dataset: ${buttonPressed.dataset.category}`)
-    });
-}
-function checkButtonClicked(buttonPressed) {
+const convertButton = document.getElementById("convert-btn");
+const leftInput = document.getElementById("from-input");
+const rightInput = document.getElementById("to-input");
+function checkButtonClicked(fromDropdown, toDropdown, buttonPressed) {
     // Check if element clicked is a button
     if (buttonPressed.tagName === 'BUTTON') {
         // Get button's data-category
         const button = buttonPressed.dataset.category;
         // Check if button has a data-category and if category exist
         if (button && category.hasOwnProperty(button)) {
+            // Clear dropdown menu options
+            fromDropdown.options.length = 0;
+            toDropdown.options.length = 0;
             // Return name of button to populate dropdown
             return button;
         }
@@ -127,9 +93,6 @@ function checkButtonClicked(buttonPressed) {
     return null;
 }
 function populateDropdowns(fromDropdown, toDropdown, button) {
-    // Clear dropdown menus
-    fromDropdown.options.length = 0;
-    toDropdown.options.length = 0;
     // Retrieve all units in selected category
     const unitsInCategory = category[button].units;
     // Populate dropdowns
@@ -148,3 +111,31 @@ function populateDropdowns(fromDropdown, toDropdown, button) {
         toDropdown.add(clonedNewOption);
     }
 }
+function conversion(value1, value2) {
+}
+if (categoryScenarioContainer) {
+    categoryScenarioContainer.addEventListener('click', function (event) {
+        const buttonPressed = event.target;
+        const fromDropdown = document.getElementById("from-dropdown");
+        const toDropdown = document.getElementById("to-dropdown");
+        let buttonClicked = checkButtonClicked(fromDropdown, toDropdown, buttonPressed);
+        populateDropdowns(fromDropdown, toDropdown, buttonClicked);
+    });
+}
+if (convertButton) {
+    convertButton.addEventListener('click', function () {
+        // const isInputFilled = 
+        const leftInput = document.getElementById("from-input");
+        const rightInput = document.getElementById("to-input");
+        let leftValue = document.getElementById("left-value");
+        let rightValue = document.getElementById("right-value");
+        if (leftValue) {
+            leftValue.innerText = `Left Input: ${leftInput.value}`;
+        }
+        if (rightValue) {
+            rightValue.innerText = `Right Input: ${rightInput.value}`;
+        }
+        console.log(leftValue);
+    });
+}
+// I am building a unit converter, I am now trying to figure out how i would implement the conversion feature. Could you give me some pointers without giving me direct answers? 
