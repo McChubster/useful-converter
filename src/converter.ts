@@ -15,12 +15,12 @@ const category: Record<string, Category> = {
     "length": {
         name: "Length",
         units: {
-            "inch": { name: "Inch", symbol: "in" },
+            "meter": { name: "Meter", symbol: "m" },
             "centimeter": { name: "Centimeter", symbol: "cm" },
             "kilometer": { name: "Kilometer", symbol: "km" },
+            "inch": { name: "Inch", symbol: "in" },
             "foot": { name: "Foot", symbol: "ft" },
             "yard": { name: "Yard", symbol: "yd" },
-            "meter": { name: "Meter", symbol: "m" },
             "millimeter": { name: "Millimeter", symbol: "mm" },
             "mile": { name: "Mile", symbol: "mi" }
         }
@@ -86,6 +86,7 @@ const category: Record<string, Category> = {
     }
 }
 
+
 interface ConversionRatios {
     toAnchor: Record<string, number> 
 }
@@ -135,10 +136,13 @@ const conversionRatios: Record<string, ConversionRatios> = {
     }
 }
 
+
 const categoryScenarioContainer = document.getElementById("category-scenarios-container")
 const convertButton = document.getElementById("convert-btn")
-const leftInput = document.getElementById("from-input") 
-const rightInput = document.getElementById("to-input")
+const fromDropdown = document.getElementById("from-dropdown") as HTMLSelectElement
+const toDropdown = document.getElementById("to-dropdown") as HTMLSelectElement
+const leftInput = document.getElementById("from-input") as HTMLInputElement
+const rightInput = document.getElementById("to-input") as HTMLInputElement
 
 
 function checkButtonClicked(fromDropdown: HTMLSelectElement, toDropdown: HTMLSelectElement,buttonPressed: HTMLElement) : string | null {
@@ -187,29 +191,56 @@ function populateDropdowns(fromDropdown: HTMLSelectElement, toDropdown: HTMLSele
     }
 }
 
+function checkInputs(leftInput: HTMLInputElement, rightInput: HTMLInputElement):{
+    isInputFilled: boolean,
+    filledInputs: HTMLInputElement[]; //Could be returning multiple elements hence the use of an array
+} {
+    // Check which input has a value
+    if (leftInput.value && rightInput.value) {
+        return { isInputFilled: true, filledInputs: [leftInput, rightInput] }
+    } else if (leftInput.value) {
+        return { isInputFilled: true, filledInputs: [leftInput] }
+    } else if (rightInput.value) {
+        return { isInputFilled: true, filledInputs: [rightInput] }
+    } else {
+        return { isInputFilled: false, filledInputs: [] }
+    }
+}
 
-function conversion(value1: number, value2?: number, ) {
+function conversion(inputs: Array<HTMLInputElement>) {
 
 }
+
+
 
 
 if (categoryScenarioContainer) {
     categoryScenarioContainer.addEventListener('click', function(event) {
         const buttonPressed = event.target as HTMLElement
-        const fromDropdown = document.getElementById("from-dropdown") as HTMLSelectElement
-        const toDropdown = document.getElementById("to-dropdown") as HTMLSelectElement
         let buttonClicked = checkButtonClicked(fromDropdown, toDropdown, buttonPressed) as string
         populateDropdowns(fromDropdown, toDropdown, buttonClicked)
     })
 }
 
+
+
+
 if (convertButton) {
     convertButton.addEventListener('click', function() {
-    // const isInputFilled = 
-
-    const leftInput = document.getElementById("from-input") as HTMLInputElement
-    const rightInput = document.getElementById("to-input") as HTMLInputElement
+    let inputStatus = checkInputs(leftInput, rightInput)
     
+    if (inputStatus.isInputFilled) {
+        
+    } else {
+        //implement what happens if no value in input
+    }
+
+
+
+    let isUnitSelected = fromDropdown.selectedOptions
+    console.log(`Left unit selected? ${isUnitSelected[0].label}`)
+
+    // isUnitSelected[0].label (for extracting the display text of an option)
 
     // For testing purposes
     let leftValue = document.getElementById("left-value")
@@ -220,9 +251,20 @@ if (convertButton) {
     if (rightValue) {
         rightValue.innerText = `Right Input: ${rightInput.value}`
     }
-
     })
-
 }
 
 
+// // 5ft(from) to 5 yd(to)
+// ft to m
+// from's value(5) * from's ratio(0.3048) = 1.524 meter
+
+// m to yd
+// base's value(1.524) / to's ratio(0.9144) = 1.6667 meter
+
+
+
+// within the convert function
+// if one of the input filled, and if both units are selected
+// {do the conversion}
+// if none input filled, then wait till whenever and input is filled 
