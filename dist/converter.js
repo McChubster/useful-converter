@@ -90,7 +90,7 @@ const conversionRatios = {
             "mile": 1609.344
         }
     },
-    "volummeMass": {
+    "volumeMass": {
         toAnchor: {
             "kilogram": 1, // Base unit
             "gram": 0.001,
@@ -109,7 +109,7 @@ const conversionRatios = {
     },
     "area": {
         toAnchor: {
-            "square_meter": 1, //Anchor unit
+            "square_meter": 1, // Base unit
             "square_centimeter": 0.0001,
             "square_kilometer": 1000000,
             "square_foot": 0.092903,
@@ -118,12 +118,12 @@ const conversionRatios = {
     }
 };
 const categoryScenarioContainer = document.getElementById("category-scenarios-container");
-const convertButton = document.getElementById("convert-btn");
-const fromDropdown = document.getElementById("from-dropdown");
-const toDropdown = document.getElementById("to-dropdown");
+const leftDropdown = document.getElementById("from-dropdown");
+const rightDropdown = document.getElementById("to-dropdown");
 const leftInput = document.getElementById("from-input");
 const rightInput = document.getElementById("to-input");
-function checkButtonClicked(fromDropdown, toDropdown, buttonPressed) {
+let currentCategory = null;
+function checkButtonClicked(fromDropdown, rightDropdown, buttonPressed) {
     // Check if element clicked is a button
     if (buttonPressed.tagName === 'BUTTON') {
         // Get button's data-category
@@ -132,14 +132,14 @@ function checkButtonClicked(fromDropdown, toDropdown, buttonPressed) {
         if (button && category.hasOwnProperty(button)) {
             // Clear dropdown menu options
             fromDropdown.options.length = 0;
-            toDropdown.options.length = 0;
+            rightDropdown.options.length = 0;
             // Return name of button to populate dropdown
             return button;
         }
     }
     return null;
 }
-function populateDropdowns(fromDropdown, toDropdown, button) {
+function populateDropdowns(leftDropdown, rightDropdown, button) {
     // Retrieve all units in selected category
     const unitsInCategory = category[button].units;
     // Populate dropdowns
@@ -148,68 +148,57 @@ function populateDropdowns(fromDropdown, toDropdown, button) {
         // Create new options
         const newOption = document.createElement('option');
         //Set value for new option (HTML)
-        newOption.value = unit.name;
+        newOption.value = unit.name.toLowerCase().replace(" ", "_");
         // Set displaying text for new option
         newOption.text = `${unit.name}(${unit.symbol})`;
-        // Add new options to fromDropdown
-        fromDropdown.add(newOption);
-        // Clone the new option and add to toDropdown (an element can only have one parent)
+        // Add new options to leftDropdown
+        leftDropdown.add(newOption);
+        // Clone the new option and add to rightDropdown (an element can only have one parent)
         const clonedNewOption = newOption.cloneNode(true);
-        toDropdown.add(clonedNewOption);
+        rightDropdown.add(clonedNewOption);
     }
 }
-function checkInputs(leftInput, rightInput) {
-    // Check which input has a value
-    if (leftInput.value && rightInput.value) {
-        return { isInputFilled: true, filledInputs: [leftInput, rightInput] };
-    }
-    else if (leftInput.value) {
-        return { isInputFilled: true, filledInputs: [leftInput] };
-    }
-    else if (rightInput.value) {
-        return { isInputFilled: true, filledInputs: [rightInput] };
-    }
-    else {
-        return { isInputFilled: false, filledInputs: [] };
-    }
-}
-function conversion(inputs) {
+function convertUnit(value, sourceUnit, targetUnit, currentCategory) {
+    // Get conversion ratios
+    const sourceToBaseRatio = conversionRatios[currentCategory].toAnchor[sourceUnit];
+    const targetToSourceRatio = conversionRatios[currentCategory].toAnchor[targetUnit];
+    // Convert from source unit to base unit
+    const sourceValueInBaseUnit = value * sourceToBaseRatio;
+    // Convert from base unit to target unit
+    const convertedValue = sourceValueInBaseUnit / targetToSourceRatio;
+    return convertedValue;
 }
 if (categoryScenarioContainer) {
     categoryScenarioContainer.addEventListener('click', function (event) {
-        const buttonPressed = event.target;
-        let buttonClicked = checkButtonClicked(fromDropdown, toDropdown, buttonPressed);
-        populateDropdowns(fromDropdown, toDropdown, buttonClicked);
-    });
-}
-if (convertButton) {
-    convertButton.addEventListener('click', function () {
-        let inputStatus = checkInputs(leftInput, rightInput);
-        if (inputStatus.isInputFilled) {
-        }
-        else {
-            //implement what happens if no value in input
-        }
-        let isUnitSelected = fromDropdown.selectedOptions;
-        console.log(`Left unit selected? ${isUnitSelected[0].label}`);
-        // isUnitSelected[0].label (for extracting the display text of an option)
-        // For testing purposes
-        let leftValue = document.getElementById("left-value");
-        let rightValue = document.getElementById("right-value");
-        if (leftValue) {
-            leftValue.innerText = `Left Input: ${leftInput.value}`;
-        }
-        if (rightValue) {
-            rightValue.innerText = `Right Input: ${rightInput.value}`;
+        const button = event.target;
+        let buttonClicked = checkButtonClicked(leftDropdown, rightDropdown, button);
+        if (buttonClicked) {
+            currentCategory = buttonClicked; //Track current category
+            populateDropdowns(leftDropdown, rightDropdown, buttonClicked);
         }
     });
 }
-// // 5ft(from) to 5 yd(to)
-// ft to m
-// from's value(5) * from's ratio(0.3048) = 1.524 meter
-// m to yd
-// base's value(1.524) / to's ratio(0.9144) = 1.6667 meter
-// within the convert function
-// if one of the input filled, and if both units are selected
-// {do the conversion}
-// if none input filled, then wait till whenever and input is filled 
+leftInput.addEventListener('input', function () {
+    const sourceValue = Number(leftInput.value);
+    if (currentCategory) {
+        rightInput.value = convertUnit(sourceValue, leftDropdown.value, rightDropdown.value, currentCategory).toFixed(4).toString();
+    }
+});
+rightInput.addEventListener('input', function () {
+    const sourceValue = Number(rightInput.value);
+    if (currentCategory) {
+        leftInput.value = convertUnit(sourceValue, rightDropdown.value, leftDropdown.value, currentCategory).toFixed(4).toString();
+    }
+});
+leftDropdown.addEventListener('change', function () {
+    if (leftInput && currentCategory) {
+        const sourceValue = Number(leftInput.value);
+        rightInput.value = convertUnit(sourceValue, leftDropdown.value, rightDropdown.value, currentCategory).toFixed(4).toString();
+    }
+});
+rightDropdown.addEventListener('change', function () {
+    if (rightInput && currentCategory) {
+        const sourceValue = Number(leftInput.value);
+        leftInput.value = convertUnit(sourceValue, rightDropdown.value, leftDropdown.value, currentCategory).toFixed(4).toString();
+    }
+});

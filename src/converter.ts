@@ -108,7 +108,7 @@ const conversionRatios: Record<string, ConversionRatios> = {
             "mile": 1609.344
         }   
     },
-    "volummeMass": {
+    "volumeMass": {
         toAnchor: {
             "kilogram": 1, // Base unit
             "gram": 0.001,
@@ -127,7 +127,7 @@ const conversionRatios: Record<string, ConversionRatios> = {
     },
     "area": {
         toAnchor: {
-            "square_meter": 1, //Anchor unit
+            "square_meter": 1, // Base unit
             "square_centimeter": 0.0001,
             "square_kilometer": 1_000_000,
             "square_foot": 0.092903,
@@ -138,14 +138,14 @@ const conversionRatios: Record<string, ConversionRatios> = {
 
 
 const categoryScenarioContainer = document.getElementById("category-scenarios-container")
-const convertButton = document.getElementById("convert-btn")
-const fromDropdown = document.getElementById("from-dropdown") as HTMLSelectElement
-const toDropdown = document.getElementById("to-dropdown") as HTMLSelectElement
+const leftDropdown = document.getElementById("from-dropdown") as HTMLSelectElement
+const rightDropdown = document.getElementById("to-dropdown") as HTMLSelectElement
 const leftInput = document.getElementById("from-input") as HTMLInputElement
 const rightInput = document.getElementById("to-input") as HTMLInputElement
+let currentCategory: string | null = null
 
 
-function checkButtonClicked(fromDropdown: HTMLSelectElement, toDropdown: HTMLSelectElement,buttonPressed: HTMLElement) : string | null {
+function checkButtonClicked(fromDropdown: HTMLSelectElement, rightDropdown: HTMLSelectElement,buttonPressed: HTMLElement) : string | null {
     // Check if element clicked is a button
     if (buttonPressed.tagName === 'BUTTON') {
         // Get button's data-category
@@ -156,7 +156,7 @@ function checkButtonClicked(fromDropdown: HTMLSelectElement, toDropdown: HTMLSel
 
             // Clear dropdown menu options
             fromDropdown.options.length = 0
-            toDropdown.options.length = 0
+            rightDropdown.options.length = 0
 
             // Return name of button to populate dropdown
             return button
@@ -166,7 +166,7 @@ function checkButtonClicked(fromDropdown: HTMLSelectElement, toDropdown: HTMLSel
 }
 
 
-function populateDropdowns(fromDropdown: HTMLSelectElement, toDropdown: HTMLSelectElement, button: string) {
+function populateDropdowns(leftDropdown: HTMLSelectElement, rightDropdown: HTMLSelectElement, button: string) {
     // Retrieve all units in selected category
     const unitsInCategory = category[button].units
 
@@ -177,94 +177,76 @@ function populateDropdowns(fromDropdown: HTMLSelectElement, toDropdown: HTMLSele
         const newOption = document.createElement('option') as HTMLOptionElement
         
         //Set value for new option (HTML)
-        newOption.value = unit.name
+        newOption.value = unit.name.toLowerCase().replace(" ","_")
 
         // Set displaying text for new option
         newOption.text = `${unit.name}(${unit.symbol})`
 
-        // Add new options to fromDropdown
-        fromDropdown.add(newOption)
+        // Add new options to leftDropdown
+        leftDropdown.add(newOption)
 
-        // Clone the new option and add to toDropdown (an element can only have one parent)
+        // Clone the new option and add to rightDropdown (an element can only have one parent)
         const clonedNewOption = newOption.cloneNode(true) as HTMLOptionElement
-        toDropdown.add(clonedNewOption)
+        rightDropdown.add(clonedNewOption)
     }
 }
 
-function checkInputs(leftInput: HTMLInputElement, rightInput: HTMLInputElement):{
-    isInputFilled: boolean,
-    filledInputs: HTMLInputElement[]; //Could be returning multiple elements hence the use of an array
-} {
-    // Check which input has a value
-    if (leftInput.value && rightInput.value) {
-        return { isInputFilled: true, filledInputs: [leftInput, rightInput] }
-    } else if (leftInput.value) {
-        return { isInputFilled: true, filledInputs: [leftInput] }
-    } else if (rightInput.value) {
-        return { isInputFilled: true, filledInputs: [rightInput] }
-    } else {
-        return { isInputFilled: false, filledInputs: [] }
-    }
+
+function convertUnit(value: number, sourceUnit: string, targetUnit: string, currentCategory: string): number {
+    // Get conversion ratios
+    const sourceToBaseRatio = conversionRatios[currentCategory].toAnchor[sourceUnit]
+    const targetToSourceRatio = conversionRatios[currentCategory].toAnchor[targetUnit]
+
+    // Convert from source unit to base unit
+    const sourceValueInBaseUnit = value * sourceToBaseRatio
+
+    // Convert from base unit to target unit
+    const convertedValue = sourceValueInBaseUnit / targetToSourceRatio
+
+    return convertedValue
 }
-
-function conversion(inputs: Array<HTMLInputElement>) {
-
-}
-
-
 
 
 if (categoryScenarioContainer) {
     categoryScenarioContainer.addEventListener('click', function(event) {
-        const buttonPressed = event.target as HTMLElement
-        let buttonClicked = checkButtonClicked(fromDropdown, toDropdown, buttonPressed) as string
-        populateDropdowns(fromDropdown, toDropdown, buttonClicked)
+        const button = event.target as HTMLElement
+        let buttonClicked = checkButtonClicked(leftDropdown, rightDropdown, button) as string
+        if (buttonClicked) {
+            currentCategory = buttonClicked //Track current category
+            populateDropdowns(leftDropdown, rightDropdown, buttonClicked)
+        }
     })
 }
 
 
-
-
-if (convertButton) {
-    convertButton.addEventListener('click', function() {
-    let inputStatus = checkInputs(leftInput, rightInput)
-    
-    if (inputStatus.isInputFilled) {
-        
-    } else {
-        //implement what happens if no value in input
-    }
-
-
-
-    let isUnitSelected = fromDropdown.selectedOptions
-    console.log(`Left unit selected? ${isUnitSelected[0].label}`)
-
-    // isUnitSelected[0].label (for extracting the display text of an option)
-
-    // For testing purposes
-    let leftValue = document.getElementById("left-value")
-    let rightValue = document.getElementById("right-value")
-    if (leftValue) {
-        leftValue.innerText = `Left Input: ${leftInput.value}`
-    }
-    if (rightValue) {
-        rightValue.innerText = `Right Input: ${rightInput.value}`
-    }
+leftInput.addEventListener('input', function(){
+    const sourceValue = Number(leftInput.value)
+    if (currentCategory) {
+        rightInput.value = convertUnit(sourceValue, leftDropdown.value, rightDropdown.value, currentCategory).toFixed(4).toString()
+        }
     })
-}
 
 
-// // 5ft(from) to 5 yd(to)
-// ft to m
-// from's value(5) * from's ratio(0.3048) = 1.524 meter
+rightInput.addEventListener('input', function(){
+    const sourceValue = Number(rightInput.value)
+    if (currentCategory) {
+        leftInput.value = convertUnit(sourceValue, rightDropdown.value, leftDropdown.value, currentCategory).toFixed(4).toString()
+        }
+    })
 
-// m to yd
-// base's value(1.524) / to's ratio(0.9144) = 1.6667 meter
+
+leftDropdown.addEventListener('change', function(){
+    if (leftInput && currentCategory) {
+        const sourceValue = Number(leftInput.value)
+        rightInput.value = convertUnit(sourceValue, leftDropdown.value, rightDropdown.value, currentCategory).toFixed(4).toString()
+    }
+})
 
 
+rightDropdown.addEventListener('change', function(){
+    if (rightInput && currentCategory) {
+        const sourceValue = Number(leftInput.value)
+        leftInput.value = convertUnit(sourceValue, rightDropdown.value, leftDropdown.value, currentCategory).toFixed(4).toString()
+    }
+})
 
-// within the convert function
-// if one of the input filled, and if both units are selected
-// {do the conversion}
-// if none input filled, then wait till whenever and input is filled 
