@@ -115,6 +115,17 @@ const conversionRatios = {
             "square_foot": 0.092903,
             "ping": 3.30579
         }
+    },
+    "time": {
+        toAnchor: {
+            "second": 1, // Base unit
+            "minute": 60,
+            "hour": 3600,
+            "day": 86400,
+            "week": 604800,
+            "month": 2629746, // ~30.44 days (average)
+            "year": 31556952 // 365.2425 days (average)
+        }
     }
 };
 const categoryScenarioContainer = document.getElementById("category-scenarios-container");
@@ -178,11 +189,11 @@ function convertTemperature(value, sourceUnit, targetUnit) {
         return convertedValue;
     }
     else if (sourceUnit === "celsius" && targetUnit === "kelvin") {
-        const convertedValue = value + 273.5;
+        const convertedValue = value + 273.15;
         return convertedValue;
     }
     else if (sourceUnit === "kelvin" && targetUnit === "celsius") {
-        const convertedValue = value - 273.5;
+        const convertedValue = value - 273.15;
         return convertedValue;
     }
     else if (sourceUnit === "fahrenheit" && targetUnit === "kelvin") {
@@ -195,6 +206,14 @@ function convertTemperature(value, sourceUnit, targetUnit) {
     }
     return value;
 }
+function formatValue(value) {
+    if (Number.isInteger(value)) {
+        return value.toString();
+    }
+    else {
+        return value.toFixed(4).replace(/\.?0+$/, '');
+    }
+}
 if (categoryScenarioContainer) {
     categoryScenarioContainer.addEventListener('click', function (event) {
         const button = event.target;
@@ -202,42 +221,63 @@ if (categoryScenarioContainer) {
         if (buttonClicked) {
             currentCategory = buttonClicked; //Track current category
             populateDropdowns(leftDropdown, rightDropdown, buttonClicked);
+            // Reset both input fileds when new category selected
+            leftInput.value = "";
+            rightInput.value = "";
         }
     });
 }
 leftInput.addEventListener('input', function () {
+    // If the left input is empty, clear the right input as well
+    if (leftInput.value === '') {
+        rightInput.value = '';
+        return;
+    }
     const sourceValue = Number(leftInput.value);
     if (currentCategory && currentCategory !== 'temperature') {
-        rightInput.value = convertUnit(sourceValue, leftDropdown.value, rightDropdown.value, currentCategory).toFixed(4).toString();
+        rightInput.value = formatValue(convertUnit(sourceValue, leftDropdown.value, rightDropdown.value, currentCategory));
     }
     else if (currentCategory === 'temperature') {
-        rightInput.value = convertTemperature(sourceValue, leftDropdown.value, rightDropdown.value).toFixed(2).toString();
+        rightInput.value = formatValue(convertTemperature(sourceValue, leftDropdown.value, rightDropdown.value));
     }
 });
 rightInput.addEventListener('input', function () {
+    // If the right input is empty, clear the left input as well
+    if (rightInput.value === '') {
+        leftInput.value = '';
+        return;
+    }
     const sourceValue = Number(rightInput.value);
     if (currentCategory && currentCategory !== 'temperature') {
-        leftInput.value = convertUnit(sourceValue, rightDropdown.value, leftDropdown.value, currentCategory).toFixed(4).toString();
+        leftInput.value = formatValue(convertUnit(sourceValue, rightDropdown.value, leftDropdown.value, currentCategory));
     }
     else if (currentCategory === 'temperature') {
-        leftInput.value = convertTemperature(sourceValue, rightDropdown.value, leftDropdown.value).toFixed(2).toString();
+        leftInput.value = formatValue(convertTemperature(sourceValue, rightDropdown.value, leftDropdown.value));
     }
 });
 leftDropdown.addEventListener('change', function () {
-    const sourceValue = Number(rightInput.value);
-    if (leftInput && currentCategory && currentCategory !== 'temperature') {
-        rightInput.value = convertUnit(sourceValue, rightDropdown.value, leftDropdown.value, currentCategory).toFixed(4).toString();
+    // Don't convert if no value in left input
+    if (leftInput.value === '') {
+        return;
+    }
+    const sourceValue = Number(leftInput.value);
+    if (currentCategory && currentCategory !== 'temperature') {
+        rightInput.value = formatValue(convertUnit(sourceValue, leftDropdown.value, rightDropdown.value, currentCategory));
     }
     else if (currentCategory === 'temperature') {
-        rightInput.value = convertTemperature(sourceValue, rightDropdown.value, leftDropdown.value).toFixed(2).toString();
+        rightInput.value = formatValue(convertTemperature(sourceValue, leftDropdown.value, rightDropdown.value));
     }
 });
 rightDropdown.addEventListener('change', function () {
+    // Don't convert if no value in left input
+    if (leftInput.value === '') {
+        return;
+    }
     const sourceValue = Number(leftInput.value);
     if (rightInput && currentCategory && currentCategory !== 'temperature') {
-        rightInput.value = convertUnit(sourceValue, rightDropdown.value, leftDropdown.value, currentCategory).toFixed(4).toString();
+        rightInput.value = formatValue(convertUnit(sourceValue, leftDropdown.value, rightDropdown.value, currentCategory));
     }
     else if (currentCategory === 'temperature') {
-        rightInput.value = convertTemperature(sourceValue, rightDropdown.value, leftDropdown.value).toFixed(2).toString();
+        rightInput.value = formatValue(convertTemperature(sourceValue, leftDropdown.value, rightDropdown.value));
     }
 });
