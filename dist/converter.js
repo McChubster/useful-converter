@@ -74,7 +74,7 @@ const category = {
         }
     }
 };
-// Map for all conversion ratios
+// Conversion ratios map for length, volume mass, and area.
 const conversionRatios = {
     // First unit within each categories are the anchor units
     // All other units convert to and from this anchor
@@ -168,6 +168,33 @@ function convertUnit(value, sourceUnit, targetUnit, currentCategory) {
     const convertedValue = sourceValueInBaseUnit / targetToSourceRatio;
     return convertedValue;
 }
+function convertTemperature(value, sourceUnit, targetUnit) {
+    if (sourceUnit === "celsius" && targetUnit === "fahrenheit") {
+        const convertedValue = (value * (9 / 5)) + 32;
+        return convertedValue;
+    }
+    else if (sourceUnit === "fahrenheit" && targetUnit === "celsius") {
+        const convertedValue = (value - 32) * (5 / 9);
+        return convertedValue;
+    }
+    else if (sourceUnit === "celsius" && targetUnit === "kelvin") {
+        const convertedValue = value + 273.5;
+        return convertedValue;
+    }
+    else if (sourceUnit === "kelvin" && targetUnit === "celsius") {
+        const convertedValue = value - 273.5;
+        return convertedValue;
+    }
+    else if (sourceUnit === "fahrenheit" && targetUnit === "kelvin") {
+        const convertedValue = (value - 32) * (5 / 9) + 273.15;
+        return convertedValue;
+    }
+    else if (sourceUnit === "kelvin" && targetUnit === "fahrenheit") {
+        const convertedValue = (value - 273.15) * (9 / 5) + 32;
+        return convertedValue;
+    }
+    return value;
+}
 if (categoryScenarioContainer) {
     categoryScenarioContainer.addEventListener('click', function (event) {
         const button = event.target;
@@ -180,25 +207,37 @@ if (categoryScenarioContainer) {
 }
 leftInput.addEventListener('input', function () {
     const sourceValue = Number(leftInput.value);
-    if (currentCategory) {
+    if (currentCategory && currentCategory !== 'temperature') {
         rightInput.value = convertUnit(sourceValue, leftDropdown.value, rightDropdown.value, currentCategory).toFixed(4).toString();
+    }
+    else if (currentCategory === 'temperature') {
+        rightInput.value = convertTemperature(sourceValue, leftDropdown.value, rightDropdown.value).toFixed(2).toString();
     }
 });
 rightInput.addEventListener('input', function () {
     const sourceValue = Number(rightInput.value);
-    if (currentCategory) {
+    if (currentCategory && currentCategory !== 'temperature') {
         leftInput.value = convertUnit(sourceValue, rightDropdown.value, leftDropdown.value, currentCategory).toFixed(4).toString();
+    }
+    else if (currentCategory === 'temperature') {
+        leftInput.value = convertTemperature(sourceValue, rightDropdown.value, leftDropdown.value).toFixed(2).toString();
     }
 });
 leftDropdown.addEventListener('change', function () {
-    if (leftInput && currentCategory) {
-        const sourceValue = Number(leftInput.value);
-        rightInput.value = convertUnit(sourceValue, leftDropdown.value, rightDropdown.value, currentCategory).toFixed(4).toString();
+    const sourceValue = Number(rightInput.value);
+    if (leftInput && currentCategory && currentCategory !== 'temperature') {
+        rightInput.value = convertUnit(sourceValue, rightDropdown.value, leftDropdown.value, currentCategory).toFixed(4).toString();
+    }
+    else if (currentCategory === 'temperature') {
+        rightInput.value = convertTemperature(sourceValue, rightDropdown.value, leftDropdown.value).toFixed(2).toString();
     }
 });
 rightDropdown.addEventListener('change', function () {
-    if (rightInput && currentCategory) {
-        const sourceValue = Number(leftInput.value);
-        leftInput.value = convertUnit(sourceValue, rightDropdown.value, leftDropdown.value, currentCategory).toFixed(4).toString();
+    const sourceValue = Number(leftInput.value);
+    if (rightInput && currentCategory && currentCategory !== 'temperature') {
+        rightInput.value = convertUnit(sourceValue, rightDropdown.value, leftDropdown.value, currentCategory).toFixed(4).toString();
+    }
+    else if (currentCategory === 'temperature') {
+        rightInput.value = convertTemperature(sourceValue, rightDropdown.value, leftDropdown.value).toFixed(2).toString();
     }
 });
